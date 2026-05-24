@@ -54,13 +54,26 @@
 
 ## 本地预览
 
-直接打开 `docs/index.html` 即可使用。
+推荐使用本地静态服务运行，避免浏览器对 ES Module、本地文件读取等能力的限制。
 
-如果你想用更稳定的本地静态服务，可以执行：
+Windows PowerShell：
+
+```powershell
+cd .\docs
+python -m http.server 8000 --bind 127.0.0.1
+```
+
+macOS / Linux：
 
 ```bash
 cd docs
 python3 -m http.server 8000
 ```
 
-然后访问 `http://localhost:8000`
+然后访问：
+
+```text
+http://127.0.0.1:8000
+```
+
+停止本地服务时，在运行服务的终端按 `Ctrl+C`。

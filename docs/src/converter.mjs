@@ -267,22 +267,16 @@ function parseOpenAIRecord(record, options) {
     throw new Error("缺少 access_token");
   }
 
-  if (typeof record.refresh_token !== "string" || record.refresh_token.trim() === "") {
-    throw new Error("缺少 refresh_token");
-  }
-
-  if (typeof record.id_token !== "string" || record.id_token.trim() === "") {
-    throw new Error("缺少 id_token");
-  }
-
   const accessPayload = parseJwtPayload(record.access_token);
-  const idPayload = parseJwtPayload(record.id_token);
+  const refreshToken = firstNonEmpty(record.refresh_token);
+  const idToken = firstNonEmpty(record.id_token);
+  const idPayload = idToken ? parseJwtPayload(idToken) : undefined;
 
   if (!accessPayload) {
     throw new Error("access_token 不是有效 JWT");
   }
 
-  if (!idPayload) {
+  if (idToken && !idPayload) {
     throw new Error("id_token 不是有效 JWT");
   }
 
@@ -294,7 +288,7 @@ function parseOpenAIRecord(record, options) {
     record.email,
     accessProfile?.email,
     accessPayload.email,
-    idPayload.email,
+    idPayload?.email,
   );
   const expiresAt = firstNonEmpty(
     normalizeFlexibleTimestamp(record.expired),
@@ -331,10 +325,10 @@ function parseOpenAIRecord(record, options) {
       email,
       expires_at: expiresAt,
       expires_in: getExpiresIn(expiresAt, now),
-      id_token: record.id_token,
+      id_token: idToken,
       organization_id: deriveOrganizationId(idAuth, accessAuth),
       plan_type: planType,
-      refresh_token: record.refresh_token,
+      refresh_token: refreshToken,
     }),
     extra: buildCommonExtra(record, email),
   };
